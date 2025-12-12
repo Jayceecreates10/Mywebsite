@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Draw Something!</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .draw-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    #drawCanvas {
+      background: #222;
+      border-radius: 15px;
+      border: 2px solid rgba(172, 7, 248, 0.7);
+      touch-action: none; /* IMPORTANT for mobile drawing */
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    h1 {
+      position: absolute;
+      top: 20px;
+      font-size: 3vw; /* Scalable font size */
+      color: white;
+      text-align: center;
+      margin: 0;
+      width: 100%;
+    }
+
+    .tools {
+      position: absolute;
+      bottom: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      padding: 10px 20px;
+      border-radius: 10px;
+      display: flex;
+      gap: 3vw; /* Scalable gap */
+      align-items: center;
+      justify-content: center;
+      width: 80%; /* Scale tool container width */
+      flex-wrap: wrap;
+    }
+
+    .tools label,
+    .tools input {
+      color: white;
+      font-size: 2vw; /* Scalable font size for tools */
+    }
+
+    #clearBtn {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(172, 7, 248, 0.8);
+      color: white;
+      cursor: pointer;
+      font-size: 2vw; /* Scalable font size for button */
+    }
+
+    #clearBtn:hover {
+      background: rgba(172, 7, 248, 1);
+    }
+
+    input[type="range"] {
+      width: 15vw; /* Scalable range width */
+    }
+
+    input[type="color"] {
+      width: 5vw; /* Scalable color picker width */
+    }
+  </style>
+</head>
+<body>
+  <div class="draw-container">
+    <h1>DRAW ANYTHING!</h1>
+    <canvas id="drawCanvas"></canvas>
+
+    <div class="tools">
+      <label>Brush Size:</label>
+      <input type="range" id="brushSize" min="2" max="30" value="5">
+
+      <label>Color:</label>
+      <input type="color" id="brushColor" value="#ffffff">
+
+      <button id="clearBtn">Clear</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("drawCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Function to adjust canvas size to the screen size
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    // Call resizeCanvas on load and whenever the window is resized
+    window.addEventListener('load', resizeCanvas);
+    window.addEventListener('resize', resizeCanvas);
+
+    // Drawing variables
+    let drawing = false;
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+
+      if (e.touches) {
+        return {
+          x: e.touches[0].clientX - rect.left,
+          y: e.touches[0].clientY - rect.top
+        };
+      }
+
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    }
+
+    function startDraw(e) {
+      e.preventDefault();
+      drawing = true;
+
+      const pos = getPos(e);
+
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function endDraw(e) {
+      e.preventDefault();
+      drawing = false;
+      ctx.beginPath();
+    }
+
+    function draw(e) {
+      if (!drawing) return;
+      e.preventDefault();
+
+      const pos = getPos(e);
+
+      ctx.lineWidth = document.getElementById("brushSize").value;
+      ctx.strokeStyle = document.getElementById("brushColor").value;
+      ctx.lineCap = "round";
+
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    // Mouse events
+    canvas.addEventListener("mousedown", startDraw);
+    canvas.addEventListener("mouseup", endDraw);
+    canvas.addEventListener("mousemove", draw);
+
+    // Touch events (Fixes inaccuracy)
+    canvas.addEventListener("touchstart", startDraw, { passive: false });
+    canvas.addEventListener("touchend", endDraw, { passive: false });
+    canvas.addEventListener("touchmove", draw, { passive: false });
+
+    // Clear button
+    document.getElementById("clearBtn").onclick = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    };
+  </script>
+</body>
+</html>
