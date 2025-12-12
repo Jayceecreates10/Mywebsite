@@ -1,11 +1,14 @@
-/* RESET & BASIC STYLES */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
-
+html, body {
+  overflow-x: hidden;
+}
 body {
+  margin: 0;
+  width: 100vw;
   background: url('Mybg.jpg') center/cover fixed no-repeat;
   font-family: Arial, sans-serif;
 }
@@ -22,24 +25,24 @@ body::before {
   );
   z-index: -1;
 }
-/* NAVBAR */
 .navbar {
-  max-width: 100%;
   width: 100%;
-  padding: 15px 20px;
+  max-width: 100vw;
+}
+.navbar {
+  width: 100%;
+  padding: 15px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: rgba(0,0,0,0.7);
 }
-
 .logo {
   color: rgba(172, 7, 248, 0.8);
   font-size: 2rem;
   font-weight: bold;
 }
 
-/* DESKTOP MENU */
 .menu ul {
   display: flex;
   gap: 25px;
@@ -59,7 +62,6 @@ body::before {
   transition: color 0.3s ease;
 }
 
-/* HAMBURGER */
 .hamburger {
   font-size: 2rem;
   color: white;
@@ -67,12 +69,10 @@ body::before {
   display: none; /* hidden on desktop */
 }
 
-/* HIDE CHECKBOX */
 #menu-toggle {
   display: none;
 }
 
-/* SIDE MENU */
 .side-menu {
   position: fixed;
   top: 86px;
@@ -82,6 +82,7 @@ body::before {
   background: rgba(0,0,0,0.7);
   padding-top: 20px;
   transition: 0.4s ease;
+  z-index: 2000;
 }
 
 .side-menu ul {
@@ -99,22 +100,20 @@ body::before {
   text-decoration: none;
 }
 
-/* SLIDE MENU OPEN */
 #menu-toggle:checked ~ .side-menu {
   left: 0;
 }
 
-/* SEARCH BAR */
 .search {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 50%;                    /* 50% width of screen */
+  width: 50%;
   padding: 10px 15px;
   border: 1px solid rgba(172, 7, 248, 0.8);
   border-radius: 25px;
-  background: rgba(0, 0, 0, 0.5); /* semi-transparent */
-  margin: 20px auto 0 auto;       /* centered horizontally, below navbar */
+  background: rgba(0, 0, 0, 0.5);
+  margin: 20px auto 0 auto;
 }
 
 .search input.srch {
@@ -133,9 +132,7 @@ body::before {
   cursor: pointer;
 }
 
-/* RESPONSIVE */
 @media (max-width:800px ) {
-  /* Hide desktop menu on mobile */
   .menu {
     display: none;
   }
@@ -143,17 +140,15 @@ body::before {
   .hamburger {
     display: block;
   }
-  
-  /* Swap logo and hamburger */
   .navbar {
-    flex-direction: row-reverse;   /* hamburger first, logo second */
+    flex-direction: row-reverse;
     justify-content: space-between;
     align-items: center;
   }
 }
 .content {
   max-width: 1200px;
-  width: 100%;
+  width: 90%;
   margin: 40px auto 0;
   color: white;
   position: relative;
@@ -167,15 +162,18 @@ body::before {
   padding-bottom: 25px;
   font-family: Arial;
   letter-spacing: 1.2px;
-  line-height: 30px;
+  font-size: clamp(14px, 3.5vw, 20px);
+  line-height: 1.6;
 }
+
 .content h1 {
-  font-family: Times New Roman;
-  font-size:50px;
-  letter-spacing: 20px;
+  font-family: "Times New Roman";
+  font-size: clamp(24px, 6vw, 50px);
+  letter-spacing: clamp(5px, 4vw, 20px);
 }
+
 .content span {
   color:rgba(172, 7, 248, 1);
-  font-size: 60px;
+  font-size: clamp(28px, 8vw, 60px);
   text-shadow: 10px 5px 30px black;
 }
