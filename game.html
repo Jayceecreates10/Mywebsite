@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catch the Ball Game</title>
+<link rel="stylesheet" href="MyWebsite.css">
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    background: url('Mybg.jpg') center/cover fixed no-repeat;
+    color: white;
+  }
+
+  h1 {
+    margin-top: 20px;
+    text-align: center;
+    color: rgba(172,7,248,0.9);
+  }
+
+  #game-container {
+    position: relative;
+    width: 400px;
+    height: 600px;
+    background: rgba(0,0,0,0.7);
+    border: 2px solid rgba(172,7,248,0.8);
+    margin-top: 20px;
+    overflow: hidden;
+    border-radius: 15px;
+  }
+
+  #ball {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: rgba(172,7,248,0.8);
+    border-radius: 50%;
+    top: 100px;
+    left: 185px;
+  }
+
+  #platform {
+    position: absolute;
+    width: 100px;
+    height: 20px;
+    background-color: #00ff00;
+    bottom: 60px;
+    left: 150px;
+    border-radius: 10px;
+  }
+
+  #score {
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  #game-over {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 400px;
+    height: 600px;
+    background: rgba(0,0,0,0.85);
+    color: red;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 15px;
+    display: none;
+    z-index: 10;
+  }
+
+  #game-over button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: rgba(172,7,248,0.8);
+    border: none;
+    color: white;
+    font-size: 18px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  p {
+    text-align: center;
+    margin-top: 5px;
+  }
+
+  #slider-container {
+    width: 400px;
+    height: 40px;
+    background: rgba(255,255,255,0.2);
+    margin-top: 20px;
+    border-radius: 20px;
+    position: relative;
+  }
+
+  #slider {
+    width: 40px;
+    height: 40px;
+    background: rgba(172,7,248,0.8);
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 180px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<h1>Catch the Ball!</h1>
+<p>Drag the purple circle to move the platform. The ball gets faster each bounce!</p>
+
+<div id="game-container">
+  <div id="ball"></div>
+  <div id="platform"></div>
+  <div id="game-over">
+    GAME OVER<br>
+    <button id="restart-btn">Restart</button>
+  </div>
+</div>
+
+<div id="score">Score: 0</div>
+
+<div id="slider-container">
+  <div id="slider"></div>
+</div>
+
+<script>
+const ball = document.getElementById('ball');
+const platform = document.getElementById('platform');
+const container = document.getElementById('game-container');
+const slider = document.getElementById('slider');
+const sliderContainer = document.getElementById('slider-container');
+const scoreDisplay = document.getElementById('score');
+const gameOverScreen = document.getElementById('game-over');
+const restartBtn = document.getElementById('restart-btn');
+
+const containerWidth = container.clientWidth;
+const containerHeight = container.clientHeight;
+
+const platformWidth = 80;
+const platformHeight = 20;
+const ballSize = 30;
+
+let ballX = 185;
+let ballY = 100;
+let ballSpeedX = 3;
+let ballSpeedY = 3;
+let score = 0;
+let gameOver = false;
+
+// Platform controlled by slider
+let dragging = false;
+
+slider.addEventListener('mousedown', e => { dragging = true; });
+document.addEventListener('mouseup', e => { dragging = false; });
+
+document.addEventListener('mousemove', e => {
+  if(!dragging) return;
+  const rect = sliderContainer.getBoundingClientRect();
+  let x = e.clientX - rect.left - slider.offsetWidth/2;
+  if(x < 0) x = 0;
+  if(x > rect.width - slider.offsetWidth) x = rect.width - slider.offsetWidth;
+  slider.style.left = x + 'px';
+  platform.style.left = x / (rect.width - slider.offsetWidth) * (containerWidth - platformWidth) + 'px';
+});
+
+// Touch events
+slider.addEventListener('touchstart', e => { dragging = true; });
+document.addEventListener('touchend', e => { dragging = false; });
+document.addEventListener('touchmove', e => {
+  if(!dragging) return;
+  const rect = sliderContainer.getBoundingClientRect();
+  let touch = e.touches[0];
+  let x = touch.clientX - rect.left - slider.offsetWidth/2;
+  if(x < 0) x = 0;
+  if(x > rect.width - slider.offsetWidth) x = rect.width - slider.offsetWidth;
+  slider.style.left = x + 'px';
+  platform.style.left = x / (rect.width - slider.offsetWidth) * (containerWidth - platformWidth) + 'px';
+});
+
+// Restart button
+restartBtn.addEventListener('click', () => {
+  ballX = containerWidth/2 - ballSize/2;
+  ballY = 100;
+  ballSpeedX = 3;
+  ballSpeedY = 3;
+  score = 0;
+  scoreDisplay.textContent = "Score: " + score;
+  gameOverScreen.style.display = "none";
+  gameOver = false;
+});
+
+function update() {
+  if(!gameOver) {
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    // Bounce walls
+    if(ballX <= 0 || ballX + ballSize >= containerWidth) ballSpeedX *= -1;
+    if(ballY <= 0) ballSpeedY *= -1;
+
+    // Bounce platform only on top
+    let platformX = parseFloat(platform.style.left);
+    let platformTop = containerHeight - platformHeight - 60;
+
+    if (
+        ballY + ballSize >= platformTop &&
+        ballY + ballSize <= platformTop + Math.abs(ballSpeedY) &&
+        ballX + ballSize >= platformX &&
+        ballX <= platformX + platformWidth
+    ) {
+        ballSpeedY *= -1;
+
+        // Smooth speed increase
+        const speedIncreaseFactor = 1.05;
+        ballSpeedY *= speedIncreaseFactor;
+        ballSpeedX *= speedIncreaseFactor;
+
+        ballY = platformTop - ballSize; // reset on top
+        score++;
+        scoreDisplay.textContent = "Score: " + score;
+    }
+
+    // Missed ball -> game over
+    if(ballY + ballSize >= containerHeight) {
+      gameOver = true;
+      gameOverScreen.style.display = "flex";
+    }
+  }
+
+  // Update ball position
+  ball.style.left = ballX + 'px';
+  ball.style.top = ballY + 'px';
+
+  requestAnimationFrame(update);
+}
+
+update();
+</script>
+</body>
+</html>
+
